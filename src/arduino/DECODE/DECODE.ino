@@ -1,72 +1,83 @@
+#include "InstructionData.h"
 #define NUMBER_OF_INSTRUCTION_PINS 8
 #define NUMBER_OF_CLOCK_STEP_PINS 5
 
 // Clock
-#define STEP_R  ST      0
+#define STEP_CLR     0
 
 // Program Counter
-#define PCH_OUT      1
-#define PCH_IN       2
-#define PCH_SET      3
-#define PCL_IN       4
-#define PCL_OUT      5
-#define PCL_SET      6
-#define PC_OUT       7
-#define PC_IN        8
-#define PC_SET       9
+#define PCL_IN       1
+#define PCL_SET      2
+#define PCL_OUT      3
+#define PCH_IN       4
+#define PCH_SET      5
+#define PCH_OUT      6
+#define PC_IN        7
+#define PC_SET       8
+#define PC_OUT       9
 
-// Memory Manager
+// Memory Manager Unit
 #define MEN_IN      10
 #define MEN_OUT     11
 
-// Instruction register
+// Instruction Register
 #define IR_IN       12
 #define IR_SET      13
 
 // Interupted Control
-#define IRQWAIT_SET 14
+#define IRQSUP_SET  14
 #define IRQSUP_CLR  15
 #define IRQWAIT_CLR 16
 
 // Registers
-#define REGA_IN     15
-#define REGA_SET    16
-#define REGA_OUT    17
-#define REGB_IN     18
-#define REGB_SET    19
-#define REGB_OUT    20
-#define REGC_IN     21
-#define REGC_SET    22
-#define REGC_OUT    23
-#define REGS_IN     24
-#define REGS_SET    25
-#define REGS_OUT    26
-#define REGF_IN     27
-#define REGF_SET    28
-#define REGF_OUT    29
-#define CIN_SET     30
-#define CIN_CLR     31
+#define REGA_IN     17
+#define REGA_SET    18
+#define REGA_OUT    19
+#define REGB_IN     20
+#define REGB_SET    21
+#define REGB_OUT    22
+#define REGS1_IN    23
+#define REGS1_SET   24
+#define REGS1_OUT   25
+#define REGS2_IN    26
+#define REGS2_SET   27
+#define REGS2_OUT   28
+#define REGC_IN     29 // Also does REGF_IN
+#define REGC_SET    30 // Also does REGF_SET
+#define REGC_OUT    31
+#define REGF_OUT    32
+#define CIN_SET     33
+#define CIN_CLR     34
 
-#define MPL_IN      32
-#define MPL_SET     33
-#define MPH_IN      34
-#define MPH_SET     35
-#define MP_OUT      36
+// Memory pointer
+#define MPL_IN      35
+#define MPL_SET     36
+#define MPH_IN      37
+#define MPH_SET     39
+#define MP_OUT      40
 
 // Stack Pointer
-#define SP_IN       37
-#define SP_SET      38
-#define SP_OUT      39
-#define SP_PUSH     40
-#define SP_POP      41
+#define SPL_IN      41
+#define SPL_SET     42
+#define SPL_OUT     43
+#define SPH_IN      44
+#define SPH_SET     45
+#define SPH_OUT     46
+#define SP_OUT      47
+#define SP_INC      48
+#define SP_DEC      49
 
-// Spare
-#define SPARE_1     42
-#define SPARE_2     43
-#define SPARE_3     44
-#define SPARE_4     45
-#define SPARE_5     46
-#define SPARE_6     47
+// Interupt Vector
+#define IVL_IN      50
+#define IVL_SET     51
+#define IVL_OUT     52
+#define IVH_IN      53
+#define IVH_SET     54
+#define IVH_OUT     55
+
+// Special functions
+#define RST         63
+
 
 #define LATCH_PIN    3
 #define CLOCK_PIN    2
@@ -115,7 +126,7 @@
 #define CLOCK_PIN_3 17
 #define CLOCK_PIN_4 18
 
-const uint8_t instructions [256 * 32 * 256 * 5] = {};
+//const uint8_t instructions [256 * 32 * 256 * 5] = {};
 
 const int INSTRUCTION_PINS[NUMBER_OF_INSTRUCTION_PINS] = { INSTRUCTION_PIN_0, INSTRUCTION_PIN_1, INSTRUCTION_PIN_2,
  INSTRUCTION_PIN_3, INSTRUCTION_PIN_4, INSTRUCTION_PIN_5, INSTRUCTION_PIN_6, INSTRUCTION_PIN_7 };
