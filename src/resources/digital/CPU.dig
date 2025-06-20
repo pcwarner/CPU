@@ -2646,6 +2646,21 @@ Address</string>
       <elementAttributes/>
       <pos x="-80" y="3200"/>
     </visualElement>
+    <visualElement>
+      <elementName>REGA.dig</elementName>
+      <elementAttributes/>
+      <pos x="1180" y="260"/>
+    </visualElement>
+    <visualElement>
+      <elementName>REGA.dig</elementName>
+      <elementAttributes/>
+      <pos x="1180" y="580"/>
+    </visualElement>
+    <visualElement>
+      <elementName>REGA.dig</elementName>
+      <elementAttributes/>
+      <pos x="1180" y="900"/>
+    </visualElement>
   </visualElements>
   <wires>
     <wire>
