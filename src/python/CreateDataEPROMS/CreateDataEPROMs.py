@@ -18,138 +18,93 @@ DATA_FILE7 = "D:\\CPU\\src\\resources\\digital\\Data\\DECODE7.hex"
 
 DATA_FILES = [DATA_FILE0, DATA_FILE1, DATA_FILE2, DATA_FILE3, DATA_FILE4, DATA_FILE5, DATA_FILE6, DATA_FILE7] 
 
-# Constants
-CLK_CLR     =  0
-PCL_IN      =  1
-PCL_SET     =  2
-PCL_OUT     =  3
-PCH_IN      =  4
-PCH_SET     =  5
-PCH_OUT     =  6
-PC_IN       =  7
-PC_SET      =  8
-PC_OUT      =  9
-MEM_IN      = 10
-MEM_OUT     = 11
-IR_IN       = 12
-IR_SET      = 13
-IRQSUP_SET  = 14
-IRQSUP_CLR  = 15
-IRQWAIT_CLR = 16
-REGA_IN     = 17
-REGA_SET    = 18
-REGA_OUT    = 19
-REGB_IN     = 20
-REGB_SET    = 21
-REGB_OUT    = 22
-REGS1_IN    = 23
-REGS1_SET   = 24
-REGS1_OUT   = 25
-REGS2_IN    = 26
-REGS2_SET   = 27
-REGS2_OUT   = 28
-REGC_IN     = 29 # Also does REGF_IN
-REGC_SET    = 30 # Also does REGF_SET
-REGC_OUT    = 31
-REGF_OUT    = 32
-CIN_SET     = 33
-CIN_CLR     = 34
-MPL_IN      = 35
-MPL_SET     = 36
-MPH_IN      = 37
-MPH_SET     = 38
-MP_OUT      = 39
-SPL_IN      = 40
-SPL_SET     = 41
-SPL_OUT     = 42
-SPH_IN      = 43
-SPH_SET     = 44
-SPH_OUT     = 45
-SP_OUT      = 46
-SP_INC      = 47
-SP_DEC      = 48
-IVL_IN      = 49
-IVL_SET     = 50
-IVL_OUT     = 51
-IVH_IN      = 52
-IVH_SET     = 53
-IVH_OUT     = 54
-RST         = 63
+ACTIONS = []
+for i in range(0, 64):
+  ACTIONS.append("")
 
-CLK_CLR_STR     = "CLK_CLR"
-PCL_IN_STR      = "PCL_IN"
-PCL_SET_STR     = "PCL_SET"
-PCL_OUT_STR     = "PCL_OUT"
-PCH_IN_STR      = "PCH_IN"
-PCH_SET_STR     = "PCH_SET"
-PCH_OUT_STR     = "PCH_OUT"
-PC_IN_STR       = "PC_IN"
-PC_SET_STR      = "PC_SET"
-PC_OUT_STR      = "PC_OUT"
-MEM_IN_STR      = "MEM_IN"
-MEM_OUT_STR     = "MEM_OUT"
-IR_IN_STR       = "IR_IN"
-IR_SET_STR      = "IR_SET"
-IRQSUP_SET_STR  = "IRQSUP_SET"
-IRQSUP_CLR_STR  = "IRQSUP_CLR"
-IRQWAIT_CLR_STR = "IRQWAIT_CLR"
-REGA_IN_STR     = "REGA_IN"
-REGA_SET_STR    = "REGA_SET"
-REGA_OUT_STR    = "REGA_OUT"
-REGB_IN_STR     = "REGB_IN"
-REGB_SET_STR    = "REGB_SET"
-REGB_OUT_STR    = "REGB_OUT"
-REGS1_IN_STR    = "REGS1_IN"
-REGS1_SET_STR   = "REGS1_SET"
-REGS1_OUT_STR   = "REGS1_OUT"
-REGS2_IN_STR    = "REGS2_IN"
-REGS2_SET_STR   = "REGS2_SET"
-REGS2_OUT_STR   = "REGS2_OUT"
-REGC_IN_STR     = "REGC_IN"
-REGC_SET_STR    = "REGC_SET"
-REGC_OUT_STR    = "REGC_OUT"
-REGF_OUT_STR    = "REGF_OUT"
-CIN_SET_STR     = "CIN_SET"
-CIN_CLR_STR     = "CIN_CLR"
-MPL_IN_STR      = "MPL_IN"
-MPL_SET_STR     = "MPL_SET"
-MPH_IN_STR      = "MPH_IN"
-MPH_SET_STR     = "MPH_SET"
-MP_OUT_STR      = "MP_OUT"
-SPL_IN_STR      = "SPL_IN"
-SPL_SET_STR     = "SPL_SET"
-SPL_OUT_STR     = "SPL_OUT"
-SPH_IN_STR      = "SPH_IN"
-SPH_SET_STR     = "SPH_SET"
-SPH_OUT_STR     = "SPH_OUT"
-SP_OUT_STR      = "SP_OUT"
-SP_INC_STR      = "SP_INC"
-SP_DEC_STR      = "SP_DEC"
-IVL_IN_STR      = "IVL_IN"
-IVL_SET_STR     = "IVL_SET"
-IVL_OUT_STR     = "IVL_OUT"
-IVH_IN_STR      = "IVH_IN"
-IVH_SET_STR     = "IVH_SET"
-IVH_OUT_STR     = "IVH_OUT"
-RST_STR         = "RST"
+# Define the actionsConstants
+ACTIONS[ 0] = "CLK_CLR"
+# Program Counter
+ACTIONS[ 1] = "PCL_IN"
+ACTIONS[ 2] = "PCL_SET"
+ACTIONS[ 3] = "PCL_OUT"
+ACTIONS[ 4] = "PCH_IN"
+ACTIONS[ 5] = "PCH_SET"
+ACTIONS[ 6] = "PCH_OUT"
+ACTIONS[ 7] = "PC_IN"
+ACTIONS[ 8] = "PC_SET"
+ACTIONS[ 9] = "PC_OUT"
+# Memory
+ACTIONS[10] = "MEM_IN"
+ACTIONS[11] = "MEM_OUT"
+# Instruction Register
+ACTIONS[12] = "IR_IN"
+ACTIONS[13] = "IR_SET"
+ACTIONS[14] = "IRQSUP_SET"
+ACTIONS[15] = "IRQSUP_CLR"
+ACTIONS[16] = "IRQWAIT_CLR"
+# Register A
+ACTIONS[17] = "REGA_IN"
+ACTIONS[18] = "REGA_SET"
+ACTIONS[19] = "REGA_OUT"
+# Register B
+ACTIONS[20] = "REGB_IN"
+ACTIONS[21] = "REGB_SET"
+ACTIONS[22] = "REGB_OUT"
+# Register S1
+ACTIONS[23] = "REGS1_IN"
+ACTIONS[24] = "REGS1_SET"
+ACTIONS[25] = "REGS1_CLR"
+ACTIONS[26] = "REGS1_OUT"
+# Register S2 also has carry 
+ACTIONS[27] = "REGS2_IN"
+ACTIONS[28] = "REGS2_SET"
+ACTIONS[29] = "REGS2_CLR"
+ACTIONS[30] = "REGS2_OUT"
+ACTIONS[31] = "CIN_IN"
+ACTIONS[32] = "CIN_VAL"
+# Register C and F
+ACTIONS[33] = "REGC_IN"  # Also does REGF_IN
+ACTIONS[34] = "REGC_ALU" # Also does REGF_ALU
+ACTIONS[35] = "REGC_SET" # Also does REGF_SET
+ACTIONS[36] = "REGC_OUT"
+ACTIONS[37] = "REGF_OUT"
+# Memory Pointer
+ACTIONS[38] = "MPL_IN"
+ACTIONS[39] = "MPL_SET"
+ACTIONS[40] = "MPH_IN"
+ACTIONS[41] = "MPH_SET"
+ACTIONS[42] = "MP_OUT"
+# Stack Pointer
+ACTIONS[43] = "SPL_IN"
+ACTIONS[44] = "SPL_SET"
+ACTIONS[45] = "SPL_OUT"
+ACTIONS[46] = "SPH_IN"
+ACTIONS[47] = "SPH_SET"
+ACTIONS[48] = "SPH_OUT"
+ACTIONS[49] = "SP_OUT"
+ACTIONS[50] = "SP_INC"
+ACTIONS[51] = "SP_DEC"
+# Interupt Vecter
+ACTIONS[52] = "IVL_IN"
+ACTIONS[53] = "IVL_SET"
+ACTIONS[54] = "IVL_OUT"
+ACTIONS[55] = "IVH_IN"
+ACTIONS[56] = "IVH_SET"
+ACTIONS[57] = "IVH_OUT"
+# Unused
+ACTIONS[58] = "UNUSED1"
+ACTIONS[59] = "UNUSED2"
+ACTIONS[60] = "UNUSED3"
+ACTIONS[61] = "UNUSED4"
+# Special actions
+ACTIONS[62] = "HLT"
+ACTIONS[63] = "RST"
 
-INSTR_VALUES = [CLK_CLR, PCL_IN,PCL_SET, PCL_OUT, PCH_IN, PCH_SET, PCH_OUT, PC_IN, PC_SET, PC_OUT, \
-  MEM_IN, MEM_OUT, IR_IN, IR_SET, IRQSUP_SET, IRQSUP_CLR, IRQWAIT_CLR, REGA_IN, REGA_SET, REGA_OUT, \
-  REGB_IN, REGB_SET, REGB_OUT, REGS1_IN, REGS1_SET, REGS1_OUT, REGS2_IN, REGS2_SET, REGS2_OUT, \
-  REGC_IN, REGC_SET, REGC_OUT, REGF_OUT, CIN_SET, CIN_CLR, MPL_IN, MPL_SET, MPH_IN, MPH_SET, MP_OUT, \
-  SPL_IN, SPL_SET, SPL_OUT, SPH_IN, SPH_SET, SPH_OUT, SP_OUT, SP_INC, SP_DEC, IVL_IN, IVL_SET, \
-  IVL_OUT, IVH_IN, IVH_SET, IVH_OUT, RST]
-INSTR_STRS  = [CLK_CLR_STR, PCL_IN_STR, PCL_SET_STR, PCL_OUT_STR, PCH_IN_STR, PCH_SET_STR, PCH_OUT_STR, \
-  PC_IN_STR, PC_SET_STR, PC_OUT_STR, MEM_IN_STR,   MEM_OUT_STR, IR_IN_STR, IR_SET_STR, IRQSUP_SET_STR, \
-  IRQSUP_CLR_STR, IRQWAIT_CLR_STR, REGA_IN_STR, REGA_SET_STR, REGA_OUT_STR, REGB_IN_STR, REGB_SET_STR, \
-  REGB_OUT_STR, REGS1_IN_STR, REGS1_SET_STR, REGS1_OUT_STR, REGS2_IN_STR, REGS2_SET_STR, REGS2_OUT_STR, \
-  REGC_IN_STR, REGC_SET_STR, REGC_OUT_STR, REGF_OUT_STR, CIN_SET_STR, CIN_CLR_STR, MPL_IN_STR, MPL_SET_STR, \
-  MPH_IN_STR, MPH_SET_STR, MP_OUT_STR, SPL_IN_STR, SPL_SET_STR, SPL_OUT_STR, SPH_IN_STR, SPH_SET_STR, \
-  SPH_OUT_STR, SP_OUT_STR, SP_INC_STR, SP_DEC_STR, IVL_IN_STR, IVL_SET_STR, IVL_OUT_STR, IVH_IN_STR, \
-  IVH_SET_STR, IVH_OUT_STR, RST_STR]
-if len(INSTR_VALUES) != len(INSTR_STRS):
-  print("Instruction arrays not same length")
-  exit(-1)
+for i in range(0, 64):
+  if len(ACTIONS[i]) < 1:
+    print("Action missing from array position=" + str(i))
+    exit(-1)
 
 # Global variables
 data = []
@@ -192,7 +147,7 @@ def createBlankData():
             instructionStep.actions.append(0)
           if step % 2 == 0:
             instructionStep.actions[0] = 1
-            instructionStep.actionsString = CLK_CLR_STR
+            instructionStep.actionsString = ACTIONS[0] # CLK_CLR
           else:
             instructionStep.actions[0] = 0
             instructionStep.actionsString = "<Null>"
@@ -247,9 +202,9 @@ def loadInstructionsFromExcel():
           parts = actions.split(",")
           for a in parts:
             found = False
-            for i in range(len(INSTR_STRS)):
-              if a == INSTR_STRS[i]:
-                j = INSTR_VALUES[i]
+            for i in range(len(ACTIONS)):
+              if a == ACTIONS[i]:
+                j = i
                 g = math.floor(j/8)
                 r = j - (g*8)
                 instructionStep.actions[g] += int(2**r)
