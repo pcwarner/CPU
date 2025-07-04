@@ -3,16 +3,21 @@
 
 #define NUMBER_OF_TIMES_TO_CHECK_BUTTON_PIN 5
 #define NUMBER_OF_TIMES_TO_CHECK_IRQ_BUTTON_PIN 20
+#define NUMBER_OF_TIMES_TO_CHECK_RST_BUTTON_PIN 20
 #define NUMBER_OF_TIMES_TO_CHECK_CLK_CLR_PIN 2
 #define BUTTON_PRESSED_ABOVE 512
+#define SHIFT_ENABLE_PIN    A0
+#define SHIFT_CLK_PIN       A1
+#define SHIFT_DATA_PIN      A2
 #define MODE_PIN 5
 #define UP_PIN 6
 #define DOWN_PIN 13
 #define STEP_PIN A7
 #define IRQ_PIN A6
-#define IRQWAIT_CLR_PIN A2
-#define IRQSUP_CLR_PIN A1
-#define IRQSUP_SET_PIN A0
+#define RST_PIN 11
+#define IRQWAIT_CLR_PIN 10
+#define IRQSUP_CLR_PIN 9
+#define IRQSUP_SET_PIN 8
 #define CLK_CLR_PIN 7
 
 #define IRQWAIT_OUT_PIN 3
@@ -30,13 +35,6 @@
 #define MODE_STEP 2
 
 #define NUMBER_OF_CLK_PINS 5
-#define CLK_PIN0 8
-#define CLK_PIN1 9
-#define CLK_PIN2 10
-#define CLK_PIN3 11
-#define CLK_PIN4 12
-const uint8_t CLK_PINS[NUMBER_OF_CLK_PINS] = { CLK_PIN0, CLK_PIN1, CLK_PIN2, CLK_PIN3, CLK_PIN4 };
-const uint8_t CLK_MASKS[NUMBER_OF_CLK_PINS] = { 0b00000001, 0b00000010, 0b00000100, 0b00001000, 0b00010000 };
 
 uint32_t lastCheckModeButton = 0;
 uint32_t lastCheckUpButton = 0;
@@ -50,11 +48,13 @@ uint8_t downButtonCounter = 0;
 uint8_t downButtonPressedCounter = 0;
 uint8_t stepButtonCounter = 0;
 uint8_t irqButtonCounter = 0;
+uint8_t rstButtonCounter = 0;
 bool modeButtonPressed = false;
 bool upButtonPressed = false;
 bool downButtonPressed = false;
 bool stepButtonPressed = false;
 bool irqButtonPressed = false;
+bool rstButtonPressed = false;
 bool irqSupSetPressed = false;
 bool irqSupClrPressed = false;
 bool irqWaitClrPressed = false;
@@ -95,8 +95,13 @@ void updateClk() {
     }
   }
   // Set all the clock pins at the same time.
-  PORTB = (PORTB & 0b11100000) | (clkInc & 0b00011111);
+  uint8_t value = clkInc & 0b00011111;
+  digitalWrite(SHIFT_ENABLE_PIN, LOW);
+  shiftOut(SHIFT_DATA_PIN, SHIFT_CLK_PIN, MSBFIRST, value);
+  digitalWrite(SHIFT_ENABLE_PIN, HIGH);
+  Serial.println(clkInc);
   lastClkInc = millis();
+  return;
 }
 
 void updateScreen() {
@@ -124,11 +129,13 @@ void updateScreen() {
 
 void reset() {
   digitalWrite(RST_OUT_PIN, HIGH);
+  Serial.println("Reset...");
   delay(200);
   digitalWrite(RST_OUT_PIN, LOW);
   digitalWrite(IRQWAIT_OUT_PIN, LOW);
   digitalWrite(IRQSUP_OUT_PIN, HIGH);
   digitalWrite(IRQ_OUT_PIN, LOW);
+  digitalWrite(RST_OUT_PIN, LOW);
   lastCheckModeButton = 0;
   lastCheckUpButton = 0;
   lastCheckDownButton = 0;
@@ -141,6 +148,7 @@ void reset() {
   downButtonPressedCounter = 0;
   stepButtonCounter = 0;
   irqButtonCounter = 0;
+  rstButtonCounter = 0;
   irq = false;
   irqWait = false;
   irqSup = true;
@@ -158,10 +166,12 @@ void setup() {
 
   u8g2.begin();
 
-  // Set up the Clock pins
-  for (int i=0; i < NUMBER_OF_CLK_PINS; i++) {
-    pinMode(CLK_PINS[i], OUTPUT);
-  }
+  pinMode(SHIFT_ENABLE_PIN, OUTPUT);
+  pinMode(SHIFT_CLK_PIN, OUTPUT);
+  pinMode(SHIFT_DATA_PIN, OUTPUT);
+  digitalWrite(SHIFT_ENABLE_PIN, LOW);
+  shiftOut(SHIFT_DATA_PIN, SHIFT_CLK_PIN, MSBFIRST, clkInc);
+  digitalWrite(SHIFT_ENABLE_PIN, HIGH);
 
   // Set up the other pins
   pinMode(RST_OUT_PIN, OUTPUT);
@@ -191,33 +201,19 @@ void checkModeButton() {
     if (!modeButtonPressed) {
       modeButtonCounter++;
       if (modeButtonCounter > NUMBER_OF_TIMES_TO_CHECK_BUTTON_PIN) {
+        if (mode == MODE_RUN) {
+          mode = MODE_STEP;
+        } else {
+          mode = MODE_RUN;
+        }
         modeButtonPressed = true;
         modeButtonCounter = 0;
-      }
-    } else {
-      modeButtonPressedCounter++;
-      if (modeButtonPressedCounter > 200 && !resetFlag) {
-        reset();
-        resetFlag = true;
-        modeButtonPressedCounter = 0;
       }
     }
   } else {
     if (modeButtonPressed) {
-      modeButtonCounter++;
-      if (modeButtonCounter > NUMBER_OF_TIMES_TO_CHECK_BUTTON_PIN) {
-        if (!resetFlag) {
-          if (mode == MODE_RUN) {
-            mode = MODE_STEP;
-          } else {
-            mode = MODE_RUN;
-          }
-        }
-        resetFlag = false;
-        modeButtonPressed = false;
-        modeButtonCounter = 0;
-        modeButtonPressedCounter = 0;
-      }
+      modeButtonPressed = false;
+      modeButtonCounter = 0;
     }
   }
   lastCheckModeButton = millis();
@@ -341,6 +337,29 @@ void checkIrqButton() {
   }
 }
 
+void checkRstButton() {
+  if (digitalRead(RST_PIN)) {
+    if (!rstButtonPressed) {
+      rstButtonCounter++;
+      if (rstButtonCounter > NUMBER_OF_TIMES_TO_CHECK_RST_BUTTON_PIN) {
+        rstButtonPressed = true;
+        rstButtonCounter = 0;
+        digitalWrite(RST_OUT_PIN, HIGH);
+        reset();
+      }
+    }
+  } else {
+    if (rstButtonPressed) {
+      rstButtonCounter++;
+      if (rstButtonCounter > NUMBER_OF_TIMES_TO_CHECK_RST_BUTTON_PIN) {
+        rstButtonPressed = false;
+        rstButtonCounter = 0;
+        digitalWrite(RST_OUT_PIN, LOW);
+      }
+    }
+  }
+}
+
 void checkIrqSupSet() {
   if (PINC & IRQSUP_SET_PIN_MASK) {
     if (!irqSupSetPressed) {
@@ -402,6 +421,7 @@ void loop() {
     checkStepButton();
   }
   checkIrqButton();
+  checkRstButton();
   if (mode == MODE_RUN) {
     if (millis() - lastClkInc >= (1000 - clkSpeed) + 1) {
       updateClk();

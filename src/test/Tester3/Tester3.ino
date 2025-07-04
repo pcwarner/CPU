@@ -16,11 +16,13 @@ bool valueChanged = false;
 uint32_t lastIrqSet = 0;
 uint32_t lastIrqSupClr = 0;
 uint32_t lastIrqSupSet = 0;
+uint32_t lastRstSet = 0;
 bool clkClr = false;
 bool irqWaitClr = false;
 bool irqSupClr = false;
 bool irqSupSet = false;
 bool irqSet = false;
+bool rstSet = false;
 char command = 0;
 
 void setup() {
@@ -48,6 +50,7 @@ void reset() {
   irqSupClr = false;
   irqSupSet = false;
   irqSet = false;
+  rstSet = false;
   setShiftOut();
 }
 
@@ -75,6 +78,9 @@ void setShiftOut() {
   }
   if (irqSet) {
     low = low | 0b00010000;
+  }
+  if (rstSet) {
+    low = low | 0b00100000;
   }
   // address = address & 0x0000ffff;
   // byte low = address % 0x0100;
@@ -195,13 +201,30 @@ void checkIrqSet() {
   }
 }
 
+void checkRstSet() {
+  if (command == 'R') {
+    Serial.println("RST");
+    rstSet = true;
+    setShiftOut();
+    lastRstSet = millis();
+    command = 0;
+  } else {
+    if (rstSet) {
+      if (millis() - lastRstSet > 10) {
+        rstSet = false;
+        setShiftOut();
+      }
+    }
+  }
+}
+
 void checkCommand() {
   if (Serial.available()) {
     byte bytes[1];
     int numRead = Serial.readBytes(bytes, 1);
     if (numRead > 0) {
       command = toupper(bytes[0]);
-      if (command == 'I' || command == 'S' || command == 'C') {
+      if (command == 'I' || command == 'S' || command == 'C' || command == 'R') {
         Serial.println(command);
       }
     }
@@ -221,5 +244,7 @@ void loop() {
   checkIrqSupSet();
 
   checkIrqSet();
+
+  checkRstSet();
 
 }
