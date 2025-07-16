@@ -16,6 +16,7 @@ bool valueChanged = false;
 uint32_t lastIrqSet = 0;
 uint32_t lastIrqSupClr = 0;
 uint32_t lastIrqSupSet = 0;
+uint32_t lastIrqWaitClr = 0;
 uint32_t lastRstSet = 0;
 bool clkClr = false;
 bool irqWaitClr = false;
@@ -51,6 +52,7 @@ void reset() {
   irqSupSet = false;
   irqSet = false;
   rstSet = false;
+  clkClr = false;
   setShiftOut();
 }
 
@@ -104,19 +106,19 @@ void checkClk() {
   }
   if (valueChanged && counter >= 10) {
     int value = 0;
-    if (portD & 0b00100000) {
+    if (lastPortD & 0b00100000) {
       value += 1;
     }
-    if (portD & 0b01000000) {
+    if (lastPortD & 0b01000000) {
       value += 2;
     }
-    if (portD & 0b10000000) {
+    if (lastPortD & 0b10000000) {
       value += 4;
     }
-    if (portB & 0b00000001) {
+    if (lastPortB & 0b00000001) {
       value += 8;
     }
-    if (portB & 0b00000010) {
+    if (lastPortB & 0b00000010) {
       value += 16;
     }
     Serial.print(value);
@@ -201,6 +203,24 @@ void checkIrqSet() {
   }
 }
 
+void checkIrqWaitClr() {
+  if (command == 'W') {
+    Serial.println("IRQWAIT off");
+    irqWaitClr = true;
+    setShiftOut();
+    lastIrqWaitClr = millis();
+    command = 0;
+  } else {
+    if (irqWaitClr) {
+      if (millis() - lastIrqWaitClr > 10) {
+        irqWaitClr = false;
+        setShiftOut();
+      }
+    }
+  }
+}
+
+
 void checkRstSet() {
   if (command == 'R') {
     Serial.println("RST");
@@ -224,7 +244,7 @@ void checkCommand() {
     int numRead = Serial.readBytes(bytes, 1);
     if (numRead > 0) {
       command = toupper(bytes[0]);
-      if (command == 'I' || command == 'S' || command == 'C' || command == 'R') {
+      if (command == 'I' || command == 'S' || command == 'C' || command == 'R' || command == 'W') {
         Serial.println(command);
       }
     }
@@ -242,6 +262,8 @@ void loop() {
   checkIrqSupClr();
 
   checkIrqSupSet();
+
+  checkIrqWaitClr();
 
   checkIrqSet();
 

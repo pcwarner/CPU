@@ -25,16 +25,20 @@
 #define IRQ_OUT_PIN 4
 #define IRQSUP_OUT_PIN 2
 
-#define MODE_PIN_MASK 0b00100000
-#define CLK_CLR_PIN_MASK 0b10000000
-#define IRQSUP_SET_PIN_MASK 0b00000001
-#define IRQSUP_CLR_PIN_MASK 0b00000010
+#define MODE_PIN_MASK        0b00100000
+#define CLK_CLR_PIN_MASK     0b10000000
+#define IRQSUP_SET_PIN_MASK  0b00000001
+#define IRQSUP_CLR_PIN_MASK  0b00000010
+#define IRQWAIT_CLR_PIN_MASK 0b00000100
 
 #define MODE_NULL 0
 #define MODE_RUN 1
 #define MODE_STEP 2
 
 #define NUMBER_OF_CLK_PINS 5
+
+#define MAX_CLOCK_DELAYS 10
+const int ClockDelay[MAX_CLOCK_DELAYS+1] = {1000, 500, 250, 125, 62, 31, 15, 8, 4, 2, 1};
 
 uint32_t lastCheckModeButton = 0;
 uint32_t lastCheckUpButton = 0;
@@ -99,7 +103,6 @@ void updateClk() {
   digitalWrite(SHIFT_ENABLE_PIN, LOW);
   shiftOut(SHIFT_DATA_PIN, SHIFT_CLK_PIN, MSBFIRST, value);
   digitalWrite(SHIFT_ENABLE_PIN, HIGH);
-  Serial.println(clkInc);
   lastClkInc = millis();
   return;
 }
@@ -154,7 +157,12 @@ void reset() {
   irqSup = true;
   clkClr = false;
   clkInc = -1;
+  clkSpeed = 0;
+  mode = MODE_STEP;
+  lastClkSpeed = -1;
+  lastMode = MODE_NULL; 
   updateClk();
+  updateScreen();
 }
 
 void setup() {
@@ -181,9 +189,9 @@ void setup() {
   digitalWrite(RST_OUT_PIN, LOW);
   digitalWrite(IRQWAIT_OUT_PIN, LOW);
   digitalWrite(IRQ_OUT_PIN, LOW);
-  digitalWrite(IRQSUP_OUT_PIN, LOW);
+  digitalWrite(IRQSUP_OUT_PIN, HIGH);
 
-  // Set up the buttons
+  // Set up the control pins
   pinMode(MODE_PIN, INPUT);
   pinMode(UP_PIN, INPUT);
   pinMode(DOWN_PIN, INPUT);
@@ -226,17 +234,17 @@ void checkUpButton() {
       if (upButtonCounter > NUMBER_OF_TIMES_TO_CHECK_BUTTON_PIN) {
         upButtonPressed = true;
         upButtonCounter = 0;
-        clkSpeed = clkSpeed + 50;
-        if (clkSpeed > 1000) {
-          clkSpeed = 1000;
+        clkSpeed = clkSpeed + 1;
+        if (clkSpeed > MAX_CLOCK_DELAYS) {
+          clkSpeed = MAX_CLOCK_DELAYS;
         }
       }
     } else {
       upButtonPressedCounter++;
       if (upButtonPressedCounter > 50) {
-        clkSpeed = clkSpeed + 50;
-        if (clkSpeed > 1000) {
-          clkSpeed = 1000;
+        clkSpeed = clkSpeed + 1;
+        if (clkSpeed > MAX_CLOCK_DELAYS) {
+          clkSpeed = MAX_CLOCK_DELAYS;
         }
         upButtonPressedCounter = 0;
       }
@@ -261,7 +269,7 @@ void checkDownButton() {
       if (downButtonCounter > NUMBER_OF_TIMES_TO_CHECK_BUTTON_PIN) {
         downButtonPressed = true;
         downButtonCounter = 0;
-        clkSpeed = clkSpeed - 50;
+        clkSpeed = clkSpeed - 1;
         if (clkSpeed < 0) {
           clkSpeed = 0;
         }
@@ -269,7 +277,7 @@ void checkDownButton() {
     } else {
       downButtonPressedCounter++;
       if (downButtonPressedCounter > 50) {
-        clkSpeed = clkSpeed - 50;
+        clkSpeed = clkSpeed - 1;
         if (clkSpeed < 0) {
           clkSpeed = 0;
         }
@@ -317,12 +325,14 @@ void checkIrqButton() {
   if (!irqWait) {
     if (analogRead(IRQ_PIN) > BUTTON_PRESSED_ABOVE) {
       if (!irqButtonPressed) {
+        irqButtonPressed = true;
+        irqButtonCounter = 0;
+      } else {
         irqButtonCounter++;
         if (irqButtonCounter > NUMBER_OF_TIMES_TO_CHECK_IRQ_BUTTON_PIN) {
-         irqButtonPressed = true;
-         irqButtonCounter = 0;
-         irqWait = true;
-         digitalWrite(IRQWAIT_OUT_PIN, HIGH);
+          irqButtonCounter = 0;
+          irqWait = true;
+          digitalWrite(IRQWAIT_OUT_PIN, HIGH);
         }
       }
     }
@@ -340,9 +350,11 @@ void checkIrqButton() {
 void checkRstButton() {
   if (digitalRead(RST_PIN)) {
     if (!rstButtonPressed) {
+      rstButtonPressed = true;
+      rstButtonCounter = 0;
+    } else {
       rstButtonCounter++;
       if (rstButtonCounter > NUMBER_OF_TIMES_TO_CHECK_RST_BUTTON_PIN) {
-        rstButtonPressed = true;
         rstButtonCounter = 0;
         digitalWrite(RST_OUT_PIN, HIGH);
         reset();
@@ -361,7 +373,7 @@ void checkRstButton() {
 }
 
 void checkIrqSupSet() {
-  if (PINC & IRQSUP_SET_PIN_MASK) {
+  if (PINB & IRQSUP_SET_PIN_MASK) {
     if (!irqSupSetPressed) {
       irqSup = true;
       irqSupSetPressed = true;
@@ -375,7 +387,7 @@ void checkIrqSupSet() {
 }
 
 void checkIrqSupClr() {
-  if (PINC & IRQSUP_CLR_PIN_MASK) {
+  if (PINB & IRQSUP_CLR_PIN_MASK) {
     if (!irqSupClrPressed) {
       irqSup = false;
       irqSupClrPressed = true;
@@ -384,6 +396,20 @@ void checkIrqSupClr() {
   } else {
     if (irqSupClrPressed) {
       irqSupClrPressed = false;
+    }
+  }
+}
+
+void checkIrqWaitClr() {
+  if (PINB & IRQWAIT_CLR_PIN_MASK) {
+    if (!irqWaitClrPressed) {
+      irqWait = false;
+      irqWaitClrPressed = true;
+      digitalWrite(IRQWAIT_OUT_PIN, LOW);
+    }
+  } else {
+    if (irqWaitClrPressed) {
+      irqWaitClrPressed = false;
     }
   }
 }
@@ -401,13 +427,10 @@ void checkClkClr() {
   }
 }
 
-
 void loop() {
-  if (irqSup) {
-    checkIrqSupClr();
-  } else {
-    checkIrqSupSet();
-  }
+  checkIrqSupClr();
+  checkIrqSupSet();
+  checkIrqWaitClr();
   if (millis() - lastCheckModeButton >= 10) {
     checkModeButton();
   }
@@ -423,7 +446,7 @@ void loop() {
   checkIrqButton();
   checkRstButton();
   if (mode == MODE_RUN) {
-    if (millis() - lastClkInc >= (1000 - clkSpeed) + 1) {
+    if (millis() - lastClkInc >= ClockDelay[clkSpeed]) {
       updateClk();
     }
   }
