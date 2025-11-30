@@ -24,7 +24,7 @@ for i in range(0, 64):
 
 # Define the actionsConstants
 # Clock
-ACTIONS[ 0] = "CLK_CLR"
+ACTIONS[ 0] = "LAST_STEP"
 ACTIONS[ 1] = "IRQSUP_SET"
 ACTIONS[ 2] = "IRQSUP_CLR"
 ACTIONS[ 3] = "IRQWAIT_CLR"
@@ -147,13 +147,9 @@ def createBlankData():
           instructionStep.actions = []
           for i in range(0, 8):
             instructionStep.actions.append(0)
-          if step % 2 == 0:
             instructionStep.actions[0] = 1
-            instructionStep.actionsString = ACTIONS[0] # CLK_CLR
-          else:
-            instructionStep.actions[0] = 0
-            instructionStep.actionsString = "<Null>"
-
+            instructionStep.actionsString = ACTIONS[0] # Set all steps to CLK_CLR
+         
           setData(ins, c, eq, step, instructionStep)
 
 # Load the instructions from the Execel Spreadsheet
@@ -289,10 +285,10 @@ def createOutputInstructionsfile():
     f.write('const uint8_t INSTRUCTIONS[] = {\n')
     for i in range(0, 256*2*2*32):
       f.write("  "\
-            + "{0:#0{1}x}".format(data[i].actions[0], 4) + ", " + "{0:#0{1}x}".format(data[i].actions[1], 4) + ", "\
-            + "{0:#0{1}x}".format(data[i].actions[2], 4) + ", " + "{0:#0{1}x}".format(data[i].actions[3], 4) + ", "\
-            + "{0:#0{1}x}".format(data[i].actions[4], 4) + ", " + "{0:#0{1}x}".format(data[i].actions[5], 4) + ", "\
-            + "{0:#0{1}x}".format(data[i].actions[6], 4) + ", " + "{0:#0{1}x}".format(data[i].actions[7], 4) + \
+            + "{0:#0{1}x}".format(data[i].actions[7], 4) + ", " + "{0:#0{1}x}".format(data[i].actions[6], 4) + ", "\
+            + "{0:#0{1}x}".format(data[i].actions[5], 4) + ", " + "{0:#0{1}x}".format(data[i].actions[4], 4) + ", "\
+            + "{0:#0{1}x}".format(data[i].actions[3], 4) + ", " + "{0:#0{1}x}".format(data[i].actions[2], 4) + ", "\
+            + "{0:#0{1}x}".format(data[i].actions[1], 4) + ", " + "{0:#0{1}x}".format(data[i].actions[0], 4) + \
             ", // " + str(data[i].instructionNumber) + ","\
             + str(data[i].stepNumber) + ": C=" + str(data[i].c) + " EQ=" + str(data[i].eq) + " A=" + data[i].actionsString +"\n")
     f.write("};\n")
