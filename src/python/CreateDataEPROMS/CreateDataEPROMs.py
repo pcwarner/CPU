@@ -7,16 +7,19 @@ import os
 OUTPUT_INSTRUCTIONS_FILE = "D:\\CPU\\src\\arduino\\DECODE\\InstructionData.h"
 INSTRUCTIONS_EXCEL_FILE = "D:\\CPU\src\\resources\\instructions\\InstructionsWithSteps.xlsx"
 
-DATA_FILE0 = "D:\\CPU\\src\\resources\\digital\\Data\\DECODE0.hex"
-DATA_FILE1 = "D:\\CPU\\src\\resources\\digital\\Data\\DECODE1.hex"
-DATA_FILE2 = "D:\\CPU\\src\\resources\\digital\\Data\\DECODE2.hex"
-DATA_FILE3 = "D:\\CPU\\src\\resources\\digital\\Data\\DECODE3.hex"
-DATA_FILE4 = "D:\\CPU\\src\\resources\\digital\\Data\\DECODE4.hex"
-DATA_FILE5 = "D:\\CPU\\src\\resources\\digital\\Data\\DECODE5.hex"
-DATA_FILE6 = "D:\\CPU\\src\\resources\\digital\\Data\\DECODE6.hex"
-DATA_FILE7 = "D:\\CPU\\src\\resources\\digital\\Data\\DECODE7.hex"
+DATA_FILE0 = "D:\\CPU\\src\\resources\\digital\\Data\\DECODE00.hex"
+DATA_FILE1 = "D:\\CPU\\src\\resources\\digital\\Data\\DECODE01.hex"
+DATA_FILE2 = "D:\\CPU\\src\\resources\\digital\\Data\\DECODE02.hex"
+DATA_FILE3 = "D:\\CPU\\src\\resources\\digital\\Data\\DECODE03.hex"
+DATA_FILE4 = "D:\\CPU\\src\\resources\\digital\\Data\\DECODE04.hex"
+DATA_FILE5 = "D:\\CPU\\src\\resources\\digital\\Data\\DECODE05.hex"
+DATA_FILE6 = "D:\\CPU\\src\\resources\\digital\\Data\\DECODE06.hex"
+DATA_FILE7 = "D:\\CPU\\src\\resources\\digital\\Data\\DECODE07.hex"
 
-DATA_FILES = [DATA_FILE0, DATA_FILE1, DATA_FILE2, DATA_FILE3, DATA_FILE4, DATA_FILE5, DATA_FILE6, DATA_FILE7] 
+DATA_FILES = [DATA_FILE0, DATA_FILE1, DATA_FILE2, DATA_FILE3, DATA_FILE4, DATA_FILE5, DATA_FILE6, DATA_FILE7]
+
+HEX_FILE = "D:\\CPU\\src\\resources\\digital\\Data\\DecodeMap.hex"
+INTEL_HEX_FILE = "D:\\CPU\\src\\resources\\digital\\Data\\INT_DECODE"
 
 ACTIONS = []
 for i in range(0, 64):
@@ -302,8 +305,58 @@ def createOutputDataFiles():
       for j in range(0, 256*2*2*32):
         f.write("{0:#0{1}x}".format(data[j].actions[i], 4) + "\n")
 
+def createOutputHexFile():
+    if os.path.isfile(HEX_FILE):
+      os.remove(HEX_FILE)
+    with open(HEX_FILE, 'w') as f:
+      for j in range(0, 256*2*2*32):
+        f.write("{:02X} ".format(data[j].actions[7]))
+        f.write("{:02X} ".format(data[j].actions[6]))
+        f.write("{:02X} ".format(data[j].actions[5]))
+        f.write("{:02X} ".format(data[j].actions[4]))
+        f.write("{:02X} ".format(data[j].actions[3]))
+        f.write("{:02X} ".format(data[j].actions[2]))
+        f.write("{:02X} ".format(data[j].actions[1]))
+        f.write("{:02X} ".format(data[j].actions[0]) + "\n")
+
+def createOutputIntelHexFile():
+    for i in range(0, 8):
+      fileName = INTEL_HEX_FILE + "{:02X}".format(i, 2) + ".hex"
+      if os.path.isfile(fileName):
+        os.remove(fileName)
+      with open(fileName, 'w') as f:
+        for j in range(0, 256*2*2*2, 16):
+          checksum = 10 + j
+          for k in range(0, 15):
+            checksum += data[j+k].actions[i]
+          checksum = checksum % 10
+          f.write(":10")
+          f.write("{:04X}".format(j, 4))
+          f.write("00")
+          f.write("{:02X}".format(data[j+ 0].actions[i]))
+          f.write("{:02X}".format(data[j+ 1].actions[i]))
+          f.write("{:02X}".format(data[j+ 2].actions[i]))
+          f.write("{:02X}".format(data[j+ 3].actions[i]))
+          f.write("{:02X}".format(data[j+ 4].actions[i]))
+          f.write("{:02X}".format(data[j+ 5].actions[i]))
+          f.write("{:02X}".format(data[j+ 6].actions[i]))
+          f.write("{:02X}".format(data[j+ 7].actions[i]))
+          f.write("{:02X}".format(data[j+ 8].actions[i]))
+          f.write("{:02X}".format(data[j+ 9].actions[i]))
+          f.write("{:02X}".format(data[j+10].actions[i]))
+          f.write("{:02X}".format(data[j+11].actions[i]))
+          f.write("{:02X}".format(data[j+12].actions[i]))
+          f.write("{:02X}".format(data[j+13].actions[i]))
+          f.write("{:02X}".format(data[j+14].actions[i]))
+          f.write("{:02X}".format(data[j+15].actions[i]))
+          f.write("{:02X}".format(checksum))        
+          f.write("\n")
+
+        f.write(":00000001FF\n")   
+
 # Main function
 def main():
+
 
   loadInstructionsFromExcel()
 
@@ -314,6 +367,9 @@ def main():
 
   createOutputInstructionsfile()
   createOutputDataFiles()
+
+  createOutputHexFile()
+  createOutputIntelHexFile()
 
 if __name__=="__main__":
     main()
